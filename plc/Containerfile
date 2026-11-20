@@ -7,4 +7,5 @@ WORKDIR /app
 COPY plc_sim.py read_plc.py ./
 
 EXPOSE 502
+STOPSIGNAL SIGINT
 CMD ["python", "-u", "plc_sim.py"]

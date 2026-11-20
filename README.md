@@ -64,7 +64,7 @@ ansible-playbook playbooks/podman-nginx.yml -K -e nginx_host_port=8090
 - [x] CI: GitHub Actions running `ansible-lint`
 - [x] Persist containers across reboots with Podman Quadlet (systemd)
 - [ ] Local OpenShift / Kubernetes (OKD or CRC)
-- [ ] OT angle: simulated PLC / Modbus service
+- [x] OT angle: simulated Modbus PLC — attacked, segmented and monitored (see [SECURITY.md](SECURITY.md))
 
 ## Background
 
