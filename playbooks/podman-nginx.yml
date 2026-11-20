@@ -1,0 +1,40 @@
+---
+- name: Install Podman and deploy an nginx container
+  hosts: local
+  gather_facts: true
+
+  vars:
+    nginx_container_name: lab-nginx
+    nginx_image: docker.io/library/nginx:stable
+    nginx_host_port: 8080
+    nginx_content_dir: "{{ playbook_dir }}/../files/web"
+
+  tasks:
+    - name: Ensure Podman is installed
+      ansible.builtin.package:
+        name: podman
+        state: present
+      become: true
+
+    - name: Pull the nginx image
+      containers.podman.podman_image:
+        name: "{{ nginx_image }}"
+
+    - name: Run the nginx container
+      containers.podman.podman_container:
+        name: "{{ nginx_container_name }}"
+        image: "{{ nginx_image }}"
+        state: started
+        ports:
+          - "{{ nginx_host_port }}:80"
+        volumes:
+          - "{{ nginx_content_dir }}:/usr/share/nginx/html:ro,Z"
+
+    - name: Confirm nginx is answering
+      ansible.builtin.uri:
+        url: "http://localhost:{{ nginx_host_port }}"
+        status_code: 200
+      register: nginx_check
+      retries: 5
+      delay: 2
+      until: nginx_check.status == 200
