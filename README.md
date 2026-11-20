@@ -1,4 +1,6 @@
 # Automation Home Lab
+[![ansible-lint](https://github.com/jpridmore1/automation-homelab/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/jpridmore1/automation-homelab/actions/workflows/ansible-lint.yml)
+
 
 A hands-on lab for learning infrastructure automation, containers, and CI/CD — built on Fedora with Ansible and Podman, with an eye toward OT/industrial environments.
 
@@ -59,7 +61,7 @@ ansible-playbook playbooks/podman-nginx.yml -K -e nginx_host_port=8090
 
 - [x] Ansible playbook: install Podman + deploy nginx
 - [x] Publish to GitHub
-- [ ] CI: GitHub Actions running `ansible-lint`
+- [x] CI: GitHub Actions running `ansible-lint`
 - [ ] Persist containers across reboots with Podman Quadlet (systemd)
 - [ ] Local OpenShift / Kubernetes (OKD or CRC)
 - [ ] OT angle: simulated PLC / Modbus service
