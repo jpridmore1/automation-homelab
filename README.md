@@ -10,7 +10,7 @@ A single Ansible playbook that:
 
 1. Installs Podman
 2. Pulls the official nginx image
-3. Runs nginx as a **rootless** container serving a custom page
+3. Runs nginx as a **rootless** container managed by systemd via Podman Quadlet (starts at boot, restarts on failure)
 4. Verifies the service responds with HTTP 200
 
 The playbook is **idempotent** — running it again makes no changes if the system is already in the desired state.
@@ -62,7 +62,7 @@ ansible-playbook playbooks/podman-nginx.yml -K -e nginx_host_port=8090
 - [x] Ansible playbook: install Podman + deploy nginx
 - [x] Publish to GitHub
 - [x] CI: GitHub Actions running `ansible-lint`
-- [ ] Persist containers across reboots with Podman Quadlet (systemd)
+- [x] Persist containers across reboots with Podman Quadlet (systemd)
 - [ ] Local OpenShift / Kubernetes (OKD or CRC)
 - [ ] OT angle: simulated PLC / Modbus service
 

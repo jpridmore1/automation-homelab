@@ -1,0 +1,15 @@
+# Managed by Ansible - do not edit by hand
+[Unit]
+Description=Lab nginx container (deployed by Ansible)
+
+[Container]
+ContainerName={{ nginx_container_name }}
+Image={{ nginx_image }}
+PublishPort={{ nginx_host_port }}:80
+Volume={{ nginx_content_dir }}:/usr/share/nginx/html:ro,Z
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

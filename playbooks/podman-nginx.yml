@@ -1,5 +1,5 @@
 ---
-- name: Install Podman and deploy an nginx container
+- name: Install Podman and deploy nginx as a Quadlet systemd service
   hosts: local
   gather_facts: true
 
@@ -7,7 +7,8 @@
     nginx_container_name: lab-nginx
     nginx_image: docker.io/library/nginx:stable
     nginx_host_port: 8080
-    nginx_content_dir: "{{ playbook_dir }}/../files/web"
+    nginx_content_dir: "{{ (playbook_dir ~ '/../files/web') | realpath }}"
+    quadlet_dir: "{{ ansible_facts['env']['HOME'] }}/.config/containers/systemd"
 
   tasks:
     - name: Ensure Podman is installed
@@ -16,19 +17,37 @@
         state: present
       become: true
 
+    - name: Enable lingering so user services start at boot
+      ansible.builtin.command: loginctl enable-linger {{ ansible_facts['user_id'] }}
+      args:
+        creates: /var/lib/systemd/linger/{{ ansible_facts['user_id'] }}
+      become: true
+
     - name: Pull the nginx image
       containers.podman.podman_image:
         name: "{{ nginx_image }}"
 
-    - name: Run the nginx container
-      containers.podman.podman_container:
-        name: "{{ nginx_container_name }}"
-        image: "{{ nginx_image }}"
+    - name: Ensure the Quadlet directory exists
+      ansible.builtin.file:
+        path: "{{ quadlet_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Deploy the nginx Quadlet unit
+      ansible.builtin.template:
+        src: lab-nginx.container.j2
+        dest: "{{ quadlet_dir }}/{{ nginx_container_name }}.container"
+        mode: "0644"
+      notify: Restart nginx service
+
+    - name: Apply pending unit changes now
+      ansible.builtin.meta: flush_handlers
+
+    - name: Ensure the nginx service is running
+      ansible.builtin.systemd_service:
+        name: "{{ nginx_container_name }}.service"
         state: started
-        ports:
-          - "{{ nginx_host_port }}:80"
-        volumes:
-          - "{{ nginx_content_dir }}:/usr/share/nginx/html:ro,Z"
+        scope: user
 
     - name: Confirm nginx is answering
       ansible.builtin.uri:
@@ -38,3 +57,11 @@
       retries: 5
       delay: 2
       until: nginx_check.status == 200
+
+  handlers:
+    - name: Restart nginx service
+      ansible.builtin.systemd_service:
+        name: "{{ nginx_container_name }}.service"
+        state: restarted
+        scope: user
+        daemon_reload: true
